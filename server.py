@@ -1,8 +1,7 @@
 # Serveur
 import asyncio
 import json
-
-
+from datetime import datetime
 
 class EchoServerProtocol(asyncio.Protocol):
     def connection_made(self, transport):
@@ -23,26 +22,11 @@ class EchoServerProtocol(asyncio.Protocol):
         elif données['type'] == "mess":
             print('Data received: {!r}'.format(message))
 
+        elif données['type'] == "ping":
+            self.date = datetime.now()
 
         print('Send: {!r}'.format(message))
         self.transport.write(data)
-
-
-
-
-        """message = message.split(':', 1)
-        username = [message]
-        
-
-       if username == 'alice':''' # Check if the username is valid
-        
-            # Send the message back to the client
-        
-        else:
-            # Reject the connection
-            print('Invalid username: {!r}'.format(username))
-            self.transport.close()"""
-
 
 async def main():
     # Get a reference to the event loop as we plan to use
