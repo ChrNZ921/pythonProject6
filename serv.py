@@ -1,6 +1,6 @@
-# Serveur
 import asyncio
 import json
+import sqlite3
 from datetime import datetime
 
 class EchoServerProtocol(asyncio.Protocol):
@@ -27,6 +27,14 @@ class EchoServerProtocol(asyncio.Protocol):
 
         print('Send: {!r}'.format(message))
         self.transport.write(data)
+
+        # Ajouter les données à la base de données SQLite
+        con = sqlite3.connect('mabase.db')
+        cur = con.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS matable (user , date, data )")
+        cur.execute("INSERT INTO matable VALUES (?, ?, datetime('now'))", (str(self.user), str(données["data"])))
+        con.commit()
+        con.close()
 
 async def main():
     # Get a reference to the event loop as we plan to use
