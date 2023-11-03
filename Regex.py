@@ -4,33 +4,26 @@ m = re.match(r'imei:(?P<imei>\d+),(?P<type>\w+),(?P<date>\d{6})(?P<time>\d{6}),(
 print(m.groupdict())
 
 
-def calculer_latitude(m):
-    loc = re.search(r'^\d{2}', m.group("latitude"))
-    lat = re.search(r'\d{2}.\d{5}', m.group("latitude"))
+def calculer_coordonnees(m, coordonnee, loc_len, ind):
 
+    #Recherche les différentes variables que l'on va utiliser
+    loc = re.search(r'^\d{' + str(loc_len) + '}', m.group(coordonnee))
+    val = re.search(r'\d{2}.\d{5}', m.group(coordonnee))
+
+    #Transformes les chainnes de caractères e valleurs numériques
     loc = int(loc.group())
-    lat = float(lat.group())
+    val = float(val.group())
 
-    lat = lat / 60
-    ind = m.group("laty")
-    result = loc + lat
-    if ind == "N":
-        print(f'la latitude est de : {result} Nord')
+    #divise val par 60
+    val = val / 60
+    result = loc + val
+
+    #determine le signe de nos coordonnées
+    if ind == "N" or ind == "E":
+        print(f'la {coordonnee} est de : {result} {ind}')
     else:
-        print(f'la latitude est de : {-result} Sud')
-def calculer_longitude(m):
-    loc = re.search(r'^\d{3}', m.group("longitude"))
-    lon = re.search(r'\d{2}.\d{5}', m.group("longitude"))
+        print(f'la {coordonnee} est de : {-result} {ind}')
 
-    loc = int(loc.group())
-    lon = float(lon.group())
-
-    lon = lon / 60
-    result = loc + lon
-    ind = m.group("longy")
-    if ind == "E":
-        print(f'la latitude est de : {result} Est')
-    else:
-        print(f'la latitude est de : {-result} Ouest')
-calculer_longitude(m)
-calculer_latitude(m)
+#rappel de la fonction et definition du nombre de chiffres que l'on va prendre au debut
+calculer_coordonnees(m, "latitude", 2, m.group("laty"))
+calculer_coordonnees(m, "longitude", 3, m.group("longy"))
