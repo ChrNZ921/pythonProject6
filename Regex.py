@@ -1,93 +1,39 @@
 import re
-import sqlite3
 
-m = re.match(r'imei:(?P<imei>\d+),(?P<type>\w+),(?P<date>\d{6})(?P<time>\d{6}),(?P<statut>.),(?P<heure>\d{6}.{3}),\w,(?P<latitude>\d{4}.{6}),(?P<laty>\w),(?P<longitude>\d{5}.{6}),(?P<longy>\w)','imei:864895031562775,tracker,231031121212,F,121212.00,A,0022.97401,S,00927.26038,E,')
-print(m.groupdict())
+message = 'imei:864895031562505,tracker,231031121212,F,121212.00,A,0022.97401,S,00927.26038,E,'
 
 
-def calculer_coordonnees(m, coordonnee, loc_len, ind):
+def decoder_message(message) :
+    # Recherche sur expression régulière
+    r = r'imei:(?P<imei>\d+),(?P<type>\w+),(?P<date>\d{6})\d{6},(?P<statut>.),(?P<heure>\d{6}.{3}),\w,(?P<latitude>\d{4}.{6}),(?P<laty>\w),(?P<longitude>\d{5}.{6}),(?P<longy>\w)'
+    m = re.match(r, message)
 
-    #Recherche les différentes variables que l'on va utiliser
-    loc = re.search(r'^\d{' + str(loc_len) + '}', m.group(coordonnee))
-    val = re.search(r'\d{2}.\d{5}', m.group(coordonnee))
+    # Extraction des matches dans un dictionnaire
+    d = m.groupdict()
 
-    #Transformes les chainnes de caractères e valleurs numériques
-    loc = int(loc.group())
-    val = float(val.group())
+    # Nettoyage date/heure
+    d['dateheure'] = re.sub(r"(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})", "20\\1-\\2-\\3 \\4:\\5:\\6",
+                            d['date'] + d['heure'][:6], 1)
+    del d['date']
+    del d['heure']
+    # Nettoyage coordonnées
+    d['latitude'] = calculer_coordonnees(d['latitude'], d['laty'])
+    d['longitude'] = calculer_coordonnees(d['longitude'], d['longy'])
+    del d['laty']
+    del d['longy']
 
-    #divise val par 60
-    val = val / 60
-    result = loc + val
-
-    #determine le signe de nos coordonnées
-    if ind == "N" or ind == "E":
-        print(f'la {coordonnee} est de : {result} {ind}')
-    else:
-        print(f'la {coordonnee} est de : {-result} {ind}')
-
-#rappel de la fonction et definition du nombre de chiffres que l'on va prendre au debut
-calculer_coordonnees(m, "latitude", 2, m.group("laty"))
-calculer_coordonnees(m, "longitude", 3, m.group("longy"))
-
-imei = m.group('imei')
-type = m.group('type')
-date = m.group('date')
-heure = m.group('heure')
-corlat =calculer_coordonnees(m, "latitude", 2, m.group("laty"))
+    return d
 
 
-# Crée une connexion à une base de données SQLite
-conn = sqlite3.connect('ma_base.db')
+def calculer_coordonnees(dms, ori) :
+    sep = 2 if ori == 'N' or ori == 'S' else 3
+    deg = int(dms[:sep])
+    min = float(dms[sep :])
+    sgn = 1 if ori == 'N' or ori == 'E' else -1
 
-# Crée un objet Cursor pour exécuter des requêtes SQL
-cur = conn.cursor()
+    result = sgn * (deg + min / 60)
 
-# Crée une table tracker avec les colonnes correspondant aux données du tracker GPS
-cur.execute("CREATE TABLE IF NOT EXISTS tracker (imei, type, date, heure, datenow)")
+    return result
 
-# Insère les données du tracker GPS dans la table tracker
-cur.execute("INSERT INTO tracker VALUES (?,?,?,?, datetime('now'))",(int(imei),(str(type)),(str(date)),(str(heure))))
 
-# Valide les changements dans la base de données
-conn.commit()
-
-# Sélectionne tous les enregistrements de la table tracker
-cur.execute("SELECT * FROM tracker")
-
-# Récupère le premier enregistrement
-row = cur.fetchone()
-
-# Convertit le tuple en dictionnaire
-data = dict(zip([c[0] for c in cur.description], row))
-
-# Affiche le dictionnaire
-print(data)
-
-# Ferme la connexion à la base de données
-conn.close()
-# Crée une connexion à une base de données SQLite
-conn = sqlite3.connect('ma_base.db')
-
-# Crée un objet Cursor pour exécuter des requêtes SQL
-cur = conn.cursor()
-
-""""# Crée une table tracker avec les colonnes correspondant aux données du tracker GPS
-cur.execute("CREATE TABLE IF NOT EXISTS tracker (imei, type, date, heure, datenow)")
-
-# Extrait les données du tracker GPS à partir du message de l'utilisateur
-data = re.match(r'imei:(?P<imei>\d+),(?P<type>\w+),(?P<date>\d{6})(?P<time>\d{6}),(?P<statut>.),(?P<heure>\d{6}.{3}),\w,(?P<latitude>\d{4}.{6}),(?P<laty>\w),(?P<longitude>\d{5}.{6}),(?P<longy>\w)','imei:864895031562775,tracker,231031121212,F,121212.00,A,0022.97401,S,00927.26038,E,').groupdict()
-
-# Insère les données du tracker GPS dans la table tracker
-cur.execute("INSERT INTO tracker VALUES (?,?,?,?, datetime('now'))",(int(data['imei']),(str(data['type'])),(str(data['date'])),(str(data['heure']))))
-
-# Valide les changements dans la base de données
-conn.commit()
-
-# Sélectionne tous les enregistrements de la table tracker
-cur.execute("SELECT * FROM tracker")
-
-# Affiche le premier enregistrement
-print(cur.fetchone())
-
-# Ferme la connexion à la base de données
-""" #conn.close()
+print(decoder_message(message))
