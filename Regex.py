@@ -1,6 +1,5 @@
 import re
-
-message = 'imei:864895031562505,tracker,231031121212,F,121212.00,A,0022.97401,S,00927.26038,E,'
+import BaseDeDonnées
 
 
 def decoder_message(message) :
@@ -9,6 +8,7 @@ def decoder_message(message) :
     m = re.match(r, message)
 
     # Extraction des matches dans un dictionnaire
+    global d
     d = m.groupdict()
 
     # Nettoyage date/heure
@@ -35,5 +35,3 @@ def calculer_coordonnees(dms, ori) :
 
     return result
 
-
-print(decoder_message(message))
