@@ -1,8 +1,4 @@
 import re
-import BaseDeDonnées
-from tracker import  EchoServerProtocol
-
-message = EchoServerProtocol.data_received()
 
 def decoder_message(message) :
     # Recherche sur expression régulière

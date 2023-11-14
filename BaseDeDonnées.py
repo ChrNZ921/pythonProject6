@@ -1,7 +1,5 @@
 
 import sqlite3
-from Regex import message, decoder_message
-d = decoder_message(message)
 def base_de_donnes(d):
 
     #Crée une connexion à une base de données SQLite
