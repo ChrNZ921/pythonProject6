@@ -1,6 +1,6 @@
 
 import sqlite3
-def base_de_donnes(d):
+def base_de_données(d):
 
     #Crée une connexion à une base de données SQLite
     conn = sqlite3.connect('ma_base.db')
