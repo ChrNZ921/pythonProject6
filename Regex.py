@@ -2,11 +2,14 @@ import re
 
 def decoder_message(message) :
     # Recherche sur expression régulière
-    r = r'imei:(?P<imei>\d+),(?P<type>\w+),(?P<date>\d{6})\d{6},(?P<statut>.),(?P<heure>\d{6}.{3}),\w,(?P<latitude>\d{4}.{6}),(?P<laty>\w),(?P<longitude>\d{5}.{6}),(?P<longy>\w)'
+    r = r'imei:(?P<imei>\d+),(?P<type>\w+),(?P<date>\d{6})\d{6},+(?P<statut>.),(?P<heure>\d{6}.{3}),\w,(?P<latitude>\d{4}.{6}),(?P<laty>\w),(?P<longitude>\d{5}.{6}),(?P<longy>\w)'
     m = re.match(r, message)
 
+    if m is None:
+        print(message)
+        return None
+
     # Extraction des matches dans un dictionnaire
-    global d
     d = m.groupdict()
 
     # Nettoyage date/heure

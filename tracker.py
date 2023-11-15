@@ -1,6 +1,6 @@
 import asyncio
 from Regex import decoder_message
-from BaseDeDonnées import base_de_données
+from BaseDeDonnees import base_de_donnees
 
 class EchoServerProtocol(asyncio.Protocol):
     def connection_made(self, transport):
@@ -10,9 +10,10 @@ class EchoServerProtocol(asyncio.Protocol):
 
     def data_received(self, data):
         message = data.decode()
-        decoder_message(message)
-        base_de_données(decoder_message(message))
-        print('Send: {!r}'.format(message))
+        d= decoder_message(message)
+        if d != None :
+            base_de_donnees(d)
+            print('Send: {!r}'.format(message))
 
 
 
